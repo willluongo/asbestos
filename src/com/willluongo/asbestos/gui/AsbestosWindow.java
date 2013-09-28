@@ -3,6 +3,8 @@ package com.willluongo.asbestos.gui;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -23,6 +25,9 @@ import com.madhackerdesigns.jinder.Room;
 import com.madhackerdesigns.jinder.models.Message;
 import com.madhackerdesigns.jinder.models.User;
 
+import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.events.TraverseEvent;
+
 public class AsbestosWindow {
 
 	protected Shell shlAsbestos;
@@ -33,6 +38,11 @@ public class AsbestosWindow {
 	private static final Logger log = LogManager.getLogger(AsbestosWindow.class
 			.getName());
 	private Text text_messages;
+	private Room room = null;
+	private SortedSet<User> users = null;
+	private SortedSet<Long> userIds = new TreeSet<Long>();
+	private Text text;
+	private List<Message> cacheMessages = new ArrayList<Message>();
 
 	/**
 	 * Launch the application.
@@ -70,15 +80,52 @@ public class AsbestosWindow {
 		campfire = new Campfire(SUBDOMAIN, TOKEN);
 	}
 
+	private void updateMessages() {
+		List<Message> lastUpdate = null;
+		try {
+			lastUpdate = room.recent();
+			if (cacheMessages.equals(lastUpdate)) {
+				System.out.println("NO UPDATE");
+
+			} else {
+				text_messages.setText("");
+
+				for (Message msg : lastUpdate) {
+					log.debug(msg.created_at + " " + msg.type);
+					if (msg.type.equals("TextMessage")) {
+						text_messages.append(room.user(msg.user_id).name
+								.concat(": ").concat(msg.body.concat("\n")));
+					}
+				}
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		cacheMessages = lastUpdate;
+
+	}
+
 	/**
 	 * Open the window.
 	 */
 	public void open() {
-		Display display = Display.getDefault();
+		final Display display = Display.getDefault();
 		createContents();
 		shlAsbestos.open();
 		shlAsbestos.layout();
+		display.timerExec(1000, new Runnable() {
+
+			@Override
+			public void run() {
+				updateMessages();
+				display.timerExec(1000, this);
+
+			}
+
+		});
 		while (!shlAsbestos.isDisposed()) {
+
 			if (!display.readAndDispatch()) {
 				display.sleep();
 			}
@@ -89,16 +136,16 @@ public class AsbestosWindow {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		Room room = null;
-		SortedSet<User> users = null;
-		SortedSet<Long> userIds = new TreeSet<Long>();
+
 		try {
 			users = campfire.users();
+			log.debug(users);
 			room = campfire.rooms().get(2);
 
 			for (User user : users) {
-				System.out.println(users);
-				System.out.println(user.name);
+
+				log.debug(user.name);
+				log.debug(user.id);
 				userIds.add(user.id);
 			}
 
@@ -122,22 +169,23 @@ public class AsbestosWindow {
 
 		text_messages = new Text(composite, SWT.READ_ONLY | SWT.WRAP
 				| SWT.V_SCROLL | SWT.MULTI);
-		text_messages.setBounds(0, 0, 430, 240);
+		text_messages.setBounds(0, 0, 430, 217);
 
-		try {
-			for (Message msg : room.recent()) {
-				if (userIds.contains(msg.user_id))
-					text_messages.append(room.user(msg.user_id).name.concat(
-							": ").concat(msg.body.concat("\n")));
-				else {
-					text_messages.append("UNKNOWN: ".concat(msg.body.concat("\n")));
-
+		text = new Text(composite, SWT.BORDER);
+		text.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				try {
+					room.speak(text.getText());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
+				text.setText("");
+				updateMessages();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		});
+		text.setBounds(0, 223, 430, 19);
+		updateMessages();
 
 	}
 }
