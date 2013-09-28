@@ -92,23 +92,6 @@ public class AsbestosWindow {
 		Room room = null;
 		SortedSet<User> users = null;
 		SortedSet<Long> userIds = new TreeSet<Long>();
-
-		shlAsbestos = new Shell();
-		shlAsbestos.setSize(450, 300);
-		shlAsbestos.setText("Asbestos");
-
-		TabFolder tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
-		tabFolder.setBounds(0, 0, 450, 299);
-
-		TabItem tbtmGeneralChat = new TabItem(tabFolder, SWT.NONE);
-		tbtmGeneralChat.setText("General Chat");
-
-		Composite composite = new Composite(tabFolder, SWT.NONE);
-		tbtmGeneralChat.setControl(composite);
-
-		text_messages = new Text(composite, SWT.READ_ONLY | SWT.WRAP
-				| SWT.V_SCROLL | SWT.MULTI);
-		text_messages.setBounds(0, 0, 430, 240);
 		try {
 			users = campfire.users();
 			room = campfire.rooms().get(2);
@@ -123,8 +106,26 @@ public class AsbestosWindow {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
+		shlAsbestos = new Shell();
+		shlAsbestos.setSize(450, 300);
+		shlAsbestos.setText("Asbestos");
+
+		TabFolder tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
+		tabFolder.setBounds(0, 0, 450, 299);
+
+		TabItem tbtmGeneralChat = new TabItem(tabFolder, SWT.NONE);
+		tbtmGeneralChat.setText(room.name);
+
+		Composite composite = new Composite(tabFolder, SWT.NONE);
+		tbtmGeneralChat.setControl(composite);
+
+		text_messages = new Text(composite, SWT.READ_ONLY | SWT.WRAP
+				| SWT.V_SCROLL | SWT.MULTI);
+		text_messages.setBounds(0, 0, 430, 240);
+
 		try {
-			for (Message msg : campfire.rooms().get(2).recent()) {
+			for (Message msg : room.recent()) {
 				if (userIds.contains(msg.user_id))
 					text_messages.append(room.user(msg.user_id).name.concat(
 							": ").concat(msg.body.concat("\n")));
