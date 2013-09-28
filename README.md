@@ -14,6 +14,7 @@ Dependencies
 * Java 7
 * A [campfire](https://campfirenow.com) account of your very own
 * [Jinder](https://github.com/flintinatux/jinder) which requires the [google-http-java-client library](https://code.google.com/p/google-http-java-client/)
+* SWT for your platform
 
 Contributing
 ------------
