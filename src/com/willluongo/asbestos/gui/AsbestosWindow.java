@@ -45,7 +45,7 @@ public class AsbestosWindow {
 	private Text text;
 	private Message lastMessage = new Message();
 	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
-	private static final int UPDATERATE = 2000;
+	private static final int UPDATERATE = 1000;
 
 	/**
 	 * Launch the application.
@@ -86,7 +86,10 @@ public class AsbestosWindow {
 	private void updateMessages() {
 		List<Message> lastUpdate = null;
 		try {
-			lastUpdate = room.recent();
+			if (lastMessage.id == null)
+				lastUpdate = room.recent();
+			else
+				lastUpdate = room.recent(lastMessage.id);
 			for (Message msg : lastUpdate) {
 				log.debug(msg.created_at + " " + msg.type);
 				if (msg.type.equals("TextMessage")) {
