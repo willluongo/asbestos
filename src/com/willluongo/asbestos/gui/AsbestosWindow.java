@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -42,7 +43,9 @@ public class AsbestosWindow {
 	private SortedSet<User> users = null;
 	private SortedSet<Long> userIds = new TreeSet<Long>();
 	private Text text;
-	private Message lastMessage = null;
+	private Message lastMessage = new Message();
+	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
+	private static final int UPDATERATE = 2000;
 
 	/**
 	 * Launch the application.
@@ -84,28 +87,22 @@ public class AsbestosWindow {
 		List<Message> lastUpdate = null;
 		try {
 			lastUpdate = room.recent();
-				for (Message msg : lastUpdate) {
-					log.debug(msg.created_at + " " + msg.type);
-					if (msg.type.equals("TextMessage")) {
-						if (lastMessage != null)
-						{
-							if (!(msg.equals(lastMessage)))
-							{
-								text_messages.append(room.user(msg.user_id).name
-										.concat(": ").concat(msg.body.concat("\n")));
-								lastMessage = msg;
-							}
+			for (Message msg : lastUpdate) {
+				log.debug(msg.created_at + " " + msg.type);
+				if (msg.type.equals("TextMessage")) {
+					if (!(msg.equals(lastMessage))) {
+						if (!(userCache.containsKey(msg.user_id))) {
+							userCache.put(msg.user_id, room.user(msg.user_id));
 						}
-						else
-						{
-							text_messages.append(room.user(msg.user_id).name
-									.concat(": ").concat(msg.body.concat("\n")));
-							lastMessage = msg;
-						}
+						text_messages.append(userCache.get(msg.user_id).name
+								.concat(": ").concat(msg.body.concat("\n")));
 
+						lastMessage = msg;
 					}
+
 				}
-			
+			}
+
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -121,18 +118,17 @@ public class AsbestosWindow {
 		createContents();
 		shlAsbestos.open();
 		shlAsbestos.layout();
-		Runnable timer = new Runnable(){
+		Runnable timer = new Runnable() {
 
 			@Override
 			public void run() {
 				updateMessages();
-				display.timerExec(1000, this);
-				
+				display.timerExec(UPDATERATE, this);
 
 			}
-			
+
 		};
-		display.timerExec(1000, timer);
+		display.timerExec(UPDATERATE, timer);
 		while (!shlAsbestos.isDisposed()) {
 
 			if (!display.readAndDispatch()) {
