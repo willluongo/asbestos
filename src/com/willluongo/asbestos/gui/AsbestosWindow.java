@@ -42,7 +42,7 @@ public class AsbestosWindow {
 	private SortedSet<User> users = null;
 	private SortedSet<Long> userIds = new TreeSet<Long>();
 	private Text text;
-	private List<Message> cacheMessages = new ArrayList<Message>();
+	private Message lastMessage = null;
 
 	/**
 	 * Launch the application.
@@ -84,25 +84,32 @@ public class AsbestosWindow {
 		List<Message> lastUpdate = null;
 		try {
 			lastUpdate = room.recent();
-			if (cacheMessages.equals(lastUpdate)) {
-				System.out.println("NO UPDATE");
-
-			} else {
-				text_messages.setText("");
-
 				for (Message msg : lastUpdate) {
 					log.debug(msg.created_at + " " + msg.type);
 					if (msg.type.equals("TextMessage")) {
-						text_messages.append(room.user(msg.user_id).name
-								.concat(": ").concat(msg.body.concat("\n")));
+						if (lastMessage != null)
+						{
+							if (!(msg.equals(lastMessage)))
+							{
+								text_messages.append(room.user(msg.user_id).name
+										.concat(": ").concat(msg.body.concat("\n")));
+								lastMessage = msg;
+							}
+						}
+						else
+						{
+							text_messages.append(room.user(msg.user_id).name
+									.concat(": ").concat(msg.body.concat("\n")));
+							lastMessage = msg;
+						}
+
 					}
 				}
-			}
+			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		cacheMessages = lastUpdate;
 
 	}
 
@@ -114,16 +121,18 @@ public class AsbestosWindow {
 		createContents();
 		shlAsbestos.open();
 		shlAsbestos.layout();
-		display.timerExec(1000, new Runnable() {
+		Runnable timer = new Runnable(){
 
 			@Override
 			public void run() {
 				updateMessages();
 				display.timerExec(1000, this);
+				
 
 			}
-
-		});
+			
+		};
+		display.timerExec(1000, timer);
 		while (!shlAsbestos.isDisposed()) {
 
 			if (!display.readAndDispatch()) {
