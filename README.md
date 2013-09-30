@@ -6,7 +6,7 @@ Asbestos has the dubious honor of being the worst Campfire client I've ever used
 Use
 ---
 
-There is a (pre-)release! You can use it! By using this campfire client you relieve me of all liability for pain, suffering, and emotional anguish caused by the use of this client, especially while configuring and finding that you cannot choose which room you join yet!
+There is a (pre-)[release](https://github.com/willluongo/asbestos/releases)! You can use it! By using this campfire client you relieve me of all liability for pain, suffering, and emotional anguish caused by the use of this client, especially while configuring and finding that you cannot choose which room you join yet!
 
 Or especially when you try to run it without the [asbestos.properties](https://github.com/willluongo/asbestos/blob/master/asbestos.properties) file in the same directory as the jar!
 
