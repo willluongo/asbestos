@@ -149,6 +149,7 @@ public class AsbestosWindow {
 			users = campfire.users();
 			log.debug(users);
 			room = campfire.rooms().get(2);
+			room.join();
 
 			for (User user : users) {
 
