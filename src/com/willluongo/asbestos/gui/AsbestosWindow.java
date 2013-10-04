@@ -183,14 +183,17 @@ public class AsbestosWindow {
 		text = new Text(composite, SWT.BORDER);
 		text.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
-				try {
-					room.speak(text.getText());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if (e.detail == SWT.TRAVERSE_RETURN) {
+					try {
+						room.speak(text.getText());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					text.setText("");
+					updateMessages();
 				}
-				text.setText("");
-				updateMessages();
+
 			}
 		});
 		text.setBounds(0, 223, 430, 19);
