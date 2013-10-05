@@ -152,7 +152,6 @@ public class AsbestosWindow {
 			log.debug(users);
 			RoomSelector select = new RoomSelector(shlAsbestos, 0,
 					campfire.rooms());
-			
 
 			room = campfire.rooms().get((int) select.open());
 			room.join();
@@ -185,7 +184,7 @@ public class AsbestosWindow {
 		text = new Text(composite, SWT.BORDER);
 		text.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
-				if (e.detail == SWT.TRAVERSE_RETURN) {
+				if ((e.detail == SWT.TRAVERSE_RETURN) && (text.getText().length() > 0)) {
 					try {
 						room.speak(text.getText());
 					} catch (IOException e1) {
