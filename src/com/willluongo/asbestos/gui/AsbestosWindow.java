@@ -144,11 +144,17 @@ public class AsbestosWindow {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-
+		shlAsbestos = new Shell();
+		shlAsbestos.setSize(450, 300);
+		shlAsbestos.setText("Asbestos");
 		try {
 			users = campfire.users();
 			log.debug(users);
-			room = campfire.rooms().get(2);
+			RoomSelector select = new RoomSelector(shlAsbestos, 0,
+					campfire.rooms());
+			
+
+			room = campfire.rooms().get((int) select.open());
 			room.join();
 
 			for (User user : users) {
@@ -162,10 +168,6 @@ public class AsbestosWindow {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-		shlAsbestos = new Shell();
-		shlAsbestos.setSize(450, 300);
-		shlAsbestos.setText("Asbestos");
 
 		TabFolder tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
 		tabFolder.setBounds(0, 0, 450, 299);
