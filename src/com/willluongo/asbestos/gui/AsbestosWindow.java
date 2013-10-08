@@ -1,19 +1,20 @@
 package com.willluongo.asbestos.gui;
 
+import java.beans.Beans;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -26,8 +27,10 @@ import com.madhackerdesigns.jinder.Room;
 import com.madhackerdesigns.jinder.models.Message;
 import com.madhackerdesigns.jinder.models.User;
 
-import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class AsbestosWindow {
 
@@ -45,6 +48,9 @@ public class AsbestosWindow {
 	private Text text;
 	private Message lastMessage = new Message();
 	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
+	// UI Elements
+	private Display display = null;
+	private TabItem tbtmRoom = null;
 	private static final int UPDATERATE = 1000;
 
 	/**
@@ -117,10 +123,13 @@ public class AsbestosWindow {
 	 * Open the window.
 	 */
 	public void open() {
-		final Display display = Display.getDefault();
+		Display.setAppName("Asbestos");
+		display = Display.getDefault();
+		
 		createContents();
 		shlAsbestos.open();
 		shlAsbestos.layout();
+
 		Runnable timer = new Runnable() {
 
 			@Override
@@ -147,13 +156,22 @@ public class AsbestosWindow {
 		shlAsbestos = new Shell();
 		shlAsbestos.setSize(450, 300);
 		shlAsbestos.setText("Asbestos");
+		TabFolder tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
+		tabFolder.setBounds(0, 0, 450, 299);
+		tbtmRoom = new TabItem(tabFolder, SWT.NONE);
+		Composite composite = new Composite(tabFolder, SWT.NONE);
+		tbtmRoom.setControl(composite);
+
+		text_messages = new Text(composite, SWT.READ_ONLY | SWT.WRAP
+				| SWT.V_SCROLL | SWT.MULTI);
+		text_messages.setBounds(0, 0, 430, 217);
+
 		try {
 			users = campfire.users();
 			log.debug(users);
-			RoomSelector select = new RoomSelector(shlAsbestos, 0,
-					campfire.rooms());
 
-			room = campfire.rooms().get((int) select.open());
+			selectRooms();
+
 			room.join();
 
 			for (User user : users) {
@@ -168,23 +186,11 @@ public class AsbestosWindow {
 			e1.printStackTrace();
 		}
 
-		TabFolder tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
-		tabFolder.setBounds(0, 0, 450, 299);
-
-		TabItem tbtmGeneralChat = new TabItem(tabFolder, SWT.NONE);
-		tbtmGeneralChat.setText(room.name);
-
-		Composite composite = new Composite(tabFolder, SWT.NONE);
-		tbtmGeneralChat.setControl(composite);
-
-		text_messages = new Text(composite, SWT.READ_ONLY | SWT.WRAP
-				| SWT.V_SCROLL | SWT.MULTI);
-		text_messages.setBounds(0, 0, 430, 217);
-
 		text = new Text(composite, SWT.BORDER);
 		text.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
-				if ((e.detail == SWT.TRAVERSE_RETURN) && (text.getText().length() > 0)) {
+				if ((e.detail == SWT.TRAVERSE_RETURN)
+						&& (text.getText().length() > 0)) {
 					try {
 						room.speak(text.getText());
 					} catch (IOException e1) {
@@ -198,6 +204,45 @@ public class AsbestosWindow {
 			}
 		});
 		text.setBounds(0, 223, 430, 19);
+
+		Menu menu = new Menu(shlAsbestos, SWT.BAR);
+		shlAsbestos.setMenuBar(menu);
+
+		MenuItem mntmRooms_1 = new MenuItem(menu, SWT.CASCADE);
+		mntmRooms_1.setText("Rooms");
+
+		Menu menu_1 = new Menu(mntmRooms_1);
+		mntmRooms_1.setMenu(menu_1);
+
+		MenuItem mntmSelectRooms = new MenuItem(menu_1, SWT.NONE);
+		mntmSelectRooms.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					selectRooms();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		mntmSelectRooms.setText("Select room...");
+		updateMessages();
+
+	}
+
+	private void selectRooms() throws IOException {
+		if (Beans.isDesignTime()) {
+			room = campfire.rooms().get(2);
+		} else {
+			RoomSelector select = new RoomSelector(shlAsbestos, 0,
+					campfire.rooms());
+
+			room = campfire.rooms().get((int) select.open());
+		}
+		tbtmRoom.setText(room.name);
+		lastMessage = new Message();
+		text_messages.setText("");
 		updateMessages();
 
 	}
