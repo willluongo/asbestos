@@ -37,6 +37,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/jinder-0.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/swt-4.3-osx64.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
