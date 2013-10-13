@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Label;
 
 public class RoomSelector extends Dialog {
 
-	protected Object result;
+	protected ArrayList<Room> result = new ArrayList<Room>();
 	protected Shell shell;
 	private ArrayList<Room> rooms;
 
@@ -60,7 +60,7 @@ public class RoomSelector extends Dialog {
 		shell.setSize(450, 300);
 		shell.setText(getText());
 
-		final List list = new List(shell, SWT.BORDER);
+		final List list = new List(shell, SWT.BORDER | SWT.MULTI);
 		list.setBounds(10, 25, 430, 225);
 		for (Room room: rooms)
 		{
@@ -71,8 +71,13 @@ public class RoomSelector extends Dialog {
 		Button btnSelect = new Button(shell, SWT.NONE);
 		btnSelect.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				result = list.getSelectionIndex();
-				shell.close();
+				int[] selected = list.getSelectionIndices();
+				System.out.println(selected);
+				System.out.println(result);
+				for (int i : selected){
+					result.add(rooms.get(i));
+				}
+					shell.close();
 			}
 		});
 		btnSelect.setBounds(299, 250, 94, 28);
