@@ -44,12 +44,10 @@ public class AsbestosWindow {
 	private static String TOKEN = null;
 	private static final Logger log = LogManager.getLogger(AsbestosWindow.class
 			.getName());
-	private Text text_messages;
-	private Room room = null;
+
 	private SortedSet<User> users = null;
 	private SortedSet<Long> userIds = new TreeSet<Long>();
-	private Message lastMessage = new Message();
-	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
+
 	private Hashtable<Long, RoomTab> tabs = new Hashtable<Long, RoomTab>();
 	private ArrayList<Room> rooms = new ArrayList<Room>();
 
