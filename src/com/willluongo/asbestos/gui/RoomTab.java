@@ -3,8 +3,6 @@ package com.willluongo.asbestos.gui;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.TraverseEvent;
