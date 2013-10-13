@@ -1,0 +1,32 @@
+<project name="asbestos" default="all" basedir="." >
+	<property name="build" location="build" />
+	<property name="src" location="src" />
+	<property name="lib" location="lib" />
+	<property name="bin" location="bin" />
+
+	<condition property="getDepZip">
+		<resourceexists>
+			<file name="asbestos-deps.zip"/>
+		</resourceexists>
+	</condition>
+
+<target name="getDeps" unless="getDepZip">
+	<mkdir dir="${lib}" />
+	<get dest="asbestos-deps.zip" src="http://s3.amazonaws.com/LuongoMedia/asbestos-deps.zip"/>
+	<unzip src="asbestos-deps.zip" dest="${lib}" />
+</target>
+
+<target name="all" depends="getDeps">
+
+</target>
+
+<target name="clean">
+	<delete verbose="true" includeEmptyDirs="true" failonerror="false">
+		<fileset dir="${lib}" />
+		<fileset dir="${build}" />
+		<fileset dir="${bin}" />
+		<fileset dir="." includes="asbestos-deps.zip" />
+	</delete>
+</target>
+
+</project>
