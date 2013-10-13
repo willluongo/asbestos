@@ -206,6 +206,7 @@ public class AsbestosWindow {
 		// Create tabs here
 		for (Room room : rooms) {
 			tabs.put(room.id, new RoomTab(room, tabFolder));
+			tabs.get(room.id).join();
 		}
 	}
 }
