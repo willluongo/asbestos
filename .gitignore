@@ -1,4 +1,9 @@
+.DS_Store
+.idea/*
+
+# Java Stuff #
 *.class
+lib/*
 
 # Package Files #
 *.jar
@@ -6,3 +11,5 @@
 *.ear
 /bin
 /asbestos.properties
+*.zip
+/bin
