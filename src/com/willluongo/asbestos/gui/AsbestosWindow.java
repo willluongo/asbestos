@@ -50,7 +50,7 @@ public class AsbestosWindow {
 	private SortedSet<Long> userIds = new TreeSet<Long>();
 	private Message lastMessage = new Message();
 	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
-	private Hashtable<Long, RoomTab> tabs;
+	private Hashtable<Long, RoomTab> tabs = new Hashtable<Long, RoomTab>();
 	private ArrayList<Room> rooms = new ArrayList<Room>();
 
 	// UI Elements
@@ -189,6 +189,11 @@ public class AsbestosWindow {
 	}
 
 	private void selectRooms() throws IOException {
+		Set<Long> keys = tabs.keySet();
+		for (long key : keys)
+		{
+			tabs.get(key).dispose();
+		}
 		tabs = new Hashtable<Long, RoomTab>();
 		if (Beans.isDesignTime()) {
 			rooms = (ArrayList<Room>) campfire.rooms();

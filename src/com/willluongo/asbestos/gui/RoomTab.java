@@ -21,8 +21,6 @@ import com.madhackerdesigns.jinder.models.User;
 public class RoomTab {
 	private Room room = null;
 	private Message lastMessage = new Message();
-	private SortedSet<User> users = null;
-	private SortedSet<Long> userIds = new TreeSet<Long>();
 	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
 
 
@@ -101,6 +99,14 @@ public class RoomTab {
 	public void join() throws IOException
 	{
 		room.join();
+	}
+	
+	public void dispose() throws IOException
+	{
+		text.dispose();
+		text_messages.dispose();
+		tbtmRoom.dispose();
+		room.leave();
 	}
 
 
