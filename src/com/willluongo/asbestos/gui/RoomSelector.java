@@ -39,7 +39,7 @@ public class RoomSelector extends Dialog {
 	 * 
 	 * @return the result
 	 */
-	public Object open() {
+	public ArrayList<Room> open() {
 		createContents();
 		shell.open();
 		shell.layout();
@@ -72,8 +72,6 @@ public class RoomSelector extends Dialog {
 		btnSelect.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				int[] selected = list.getSelectionIndices();
-				System.out.println(selected);
-				System.out.println(result);
 				for (int i : selected){
 					result.add(rooms.get(i));
 				}

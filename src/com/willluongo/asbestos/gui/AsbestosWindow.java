@@ -1,12 +1,15 @@
 package com.willluongo.asbestos.gui;
 
+import java.awt.Dialog;
 import java.beans.Beans;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -45,12 +48,15 @@ public class AsbestosWindow {
 	private Room room = null;
 	private SortedSet<User> users = null;
 	private SortedSet<Long> userIds = new TreeSet<Long>();
-	private Text text;
 	private Message lastMessage = new Message();
 	private Hashtable<Long, User> userCache = new Hashtable<Long, User>();
+	private Hashtable<Long, RoomTab> tabs;
+	private ArrayList<Room> rooms = new ArrayList<Room>();
+
 	// UI Elements
 	private Display display = null;
-	private TabItem tbtmRoom = null;
+	private TabFolder tabFolder;
+
 	private static final int UPDATERATE = 1000;
 
 	/**
@@ -90,31 +96,10 @@ public class AsbestosWindow {
 	}
 
 	private void updateMessages() {
-		List<Message> lastUpdate = null;
-		try {
-			if (lastMessage.id == null)
-				lastUpdate = room.recent();
-			else
-				lastUpdate = room.recent(lastMessage.id);
-			for (Message msg : lastUpdate) {
-				log.debug(msg.created_at + " " + msg.type);
-				if (msg.type.equals("TextMessage")) {
-					if (!(msg.equals(lastMessage))) {
-						if (!(userCache.containsKey(msg.user_id))) {
-							userCache.put(msg.user_id, room.user(msg.user_id));
-						}
-						text_messages.append(userCache.get(msg.user_id).name
-								.concat(": ").concat(msg.body.concat("\n")));
-
-						lastMessage = msg;
-					}
-
-				}
-			}
-
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		Set<Long> keys = tabs.keySet();
+		for (long key : keys)
+		{
+			tabs.get(key).update();
 		}
 
 	}
@@ -125,7 +110,7 @@ public class AsbestosWindow {
 	public void open() {
 		Display.setAppName("Asbestos");
 		display = Display.getDefault();
-		
+
 		createContents();
 		shlAsbestos.open();
 		shlAsbestos.layout();
@@ -156,23 +141,14 @@ public class AsbestosWindow {
 		shlAsbestos = new Shell();
 		shlAsbestos.setSize(450, 300);
 		shlAsbestos.setText("Asbestos");
-		TabFolder tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
+		tabFolder = new TabFolder(shlAsbestos, SWT.NONE);
 		tabFolder.setBounds(0, 0, 450, 299);
-		tbtmRoom = new TabItem(tabFolder, SWT.NONE);
-		Composite composite = new Composite(tabFolder, SWT.NONE);
-		tbtmRoom.setControl(composite);
-
-		text_messages = new Text(composite, SWT.READ_ONLY | SWT.WRAP
-				| SWT.V_SCROLL | SWT.MULTI);
-		text_messages.setBounds(0, 0, 430, 217);
 
 		try {
 			users = campfire.users();
 			log.debug(users);
 
 			selectRooms();
-
-			room.join();
 
 			for (User user : users) {
 
@@ -185,25 +161,6 @@ public class AsbestosWindow {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-		text = new Text(composite, SWT.BORDER);
-		text.addTraverseListener(new TraverseListener() {
-			public void keyTraversed(TraverseEvent e) {
-				if ((e.detail == SWT.TRAVERSE_RETURN)
-						&& (text.getText().length() > 0)) {
-					try {
-						room.speak(text.getText());
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					text.setText("");
-					updateMessages();
-				}
-
-			}
-		});
-		text.setBounds(0, 223, 430, 19);
 
 		Menu menu = new Menu(shlAsbestos, SWT.BAR);
 		shlAsbestos.setMenuBar(menu);
@@ -232,18 +189,18 @@ public class AsbestosWindow {
 	}
 
 	private void selectRooms() throws IOException {
+		tabs = new Hashtable<Long, RoomTab>();
 		if (Beans.isDesignTime()) {
-			room = campfire.rooms().get(2);
+			rooms = (ArrayList<Room>) campfire.rooms();
 		} else {
 			RoomSelector select = new RoomSelector(shlAsbestos, 0,
 					campfire.rooms());
 
-			room = campfire.rooms().get((int) select.open());
+			rooms = select.open();
 		}
-		tbtmRoom.setText(room.name);
-		lastMessage = new Message();
-		text_messages.setText("");
-		updateMessages();
-
+		// Create tabs here
+		for (Room room : rooms) {
+			tabs.put(room.id, new RoomTab(room, tabFolder));
+		}
 	}
 }
